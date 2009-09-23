@@ -1,0 +1,57 @@
+---
+name: Miril
+version: 0.001
+author:
+  - 'Peter Shangov <pshangov@yahoo.com>'
+abstract: A Static Content Management System
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test::More: 0
+requires:
+  CGI: 0
+  CGI::Application: 0
+  CGI::Application::Plugin::Authentication: 0
+  CGI::Application::Plugin::Forward: 0
+  CGI::Application::Plugin::Redirect: 0
+  CGI::Cookie: 0
+  Cwd: 0
+  Data::AsObject: 0
+  Data::Page: 0
+  File::Copy: 0
+  File::Slurp: 0
+  File::Spec::Functions: 0
+  HTML::Template::Pluggable: 0
+  HTML::Template::Plugin::Dot: 0
+  IO::File: 0
+  List::Util: 0
+  Module::Load: 0
+  Number::Format: 0
+  Scalar::Util: 0
+  Text::MultiMarkdown: 0
+  Time::Format: 0
+  Try::Tiny: 0
+  XML::TreePP: 0
+configure_requires:
+  Module::Build: 0.340201
+provides:
+  Miril:
+    file: lib/Miril.pm
+    version: 0.001
+  Miril::Config:
+    file: lib/Miril/Config.pm
+  Miril::Error:
+    file: lib/Miril/Error.pm
+  Miril::Filter::Markdown:
+    file: lib/Miril/Filter/Markdown.pm
+  Miril::Model::File::XMLTPP:
+    file: lib/Miril/Model/File/XMLTPP.pm
+  Miril::Theme::Flashyweb:
+    file: lib/Miril/Theme/Flashyweb.pm
+  Miril::UserManager::XMLTPP:
+    file: lib/Miril/UserManager/XMLTPP.pm
+generated_by: Module::Build version 0.340201
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
