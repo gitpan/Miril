@@ -1,5 +1,8 @@
 Revision history for Miril
 
+0.003   25/09/2009
+        Fixed small bug in Miril::Model::File::XMLTPP.
+
 0.002   24/09/2009
         POD fixes.
 

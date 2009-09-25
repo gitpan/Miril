@@ -9,11 +9,11 @@ Miril - A Static Content Management System
 
 =head1 VERSION
 
-Version 0.002
+Version 0.003
 
 =cut
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 $VERSION = eval $VERSION;
 
 use base ("CGI::Application");
