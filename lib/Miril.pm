@@ -9,11 +9,11 @@ Miril - A Static Content Management System
 
 =head1 VERSION
 
-Version 0.003
+Version 0.004
 
 =cut
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 $VERSION = eval $VERSION;
 
 use base ("CGI::Application");
@@ -32,8 +32,6 @@ use Time::Format                              qw(time_format);
 use Number::Format                            qw(format_bytes);
 use File::Spec::Functions                     qw(catfile);
 use Data::AsObject                            qw(dao);
-use Data::Dumper                              qw(Dumper);
-use CGI::Cookie;
 use Try::Tiny                                 qw(try catch);
 use Module::Load                              qw(load);
 use Miril::Error                              qw(miril_warn miril_die);
@@ -98,6 +96,15 @@ sub setup {
 		miril_die("Could not load model", $_);
 	};
 	return unless $self->model;
+
+	# load view
+	my $view_name = "Miril::View::" . $self->cfg->view;
+	try {
+		load $view_name;
+		$self->{view} = $view_name->new($self->cfg->tmpl_path);
+	} catch {
+		miril_die("Could not load view", $_);
+	};
 
 	# load filter
 	my $filter_name = "Miril::Filter::" . $self->cfg->filter;
@@ -186,16 +193,7 @@ sub list_items {
 		title             => ( $self->query->param('title')  or undef ),
 		type              => ( $self->query->param('type')   or undef ),
 		status            => ( $self->query->param('status') or undef ),
-		topic             => ( $self->query->param('topic')  or undef ),
-		#created_before    => $self->query->param('created_before'),
-		#created_on        => $self->query->param('created_on'),
-		#created_after     => $self->query->param('created_after'),
-		#updated_before    => $self->query->param('updated_before'),
-		#updated_on        => $self->query->param('updated_on'),
-		#updated_after     => $self->query->param('updated_after'),
-		#published_before  => $self->query->param('published_before'),
-		#published_on      => $self->query->param('published_on'),
-		#published_after   => $self->query->param('published_after'),
+		topic             => ( $self->query->param('topic') ? \($self->query->param('topic')) : undef ),
 	);
 
 	my @current_items = $self->paginate(@items);
@@ -220,11 +218,6 @@ sub search_items {
 
 	my @statuses = map +{ "cfg_status", $_ }, $self->cfg->workflow->status;
 	my @types    = map +{ "cfg_type",  $_->name, "cfg_m_type",   $_->id }, $self->cfg->types->type;
-
-	unshift @authors,  { cfg_author => undef };
-	unshift @statuses, { cfg_status => undef };
-	unshift @types,    { cfg_type => undef, cfg_m_type => undef };
-	unshift @topics,   { cfg_topic => undef, cfg_topic_id => undef };
 
 	$tmpl->param('authors',  \@authors);
 	$tmpl->param('statuses', \@statuses);
@@ -279,10 +272,14 @@ sub edit_item {
 	my $has_topics  = 1 if $self->cfg->{topics}{topic};
 
 	
-	my $cur_author = $item->{author};
-	my $cur_status = $item->{status};
-	my $cur_topic  = $item->{topic}->{id};
-	my $cur_type   = $item->{type};
+	my $cur_author = $item->author;
+	my $cur_status = $item->status;
+	my $cur_topic;
+	my %cur_topics;
+	if (@{ $item->{topics} }) {
+		%cur_topics = map {$_->id => 1} $item->topics;
+	}
+	my $cur_type   = $item->type;
 	
 	# the "+" instructs map to produce a list of hashrefs, see "perldoc -f map"
 	if ($has_authors) {
@@ -297,7 +294,7 @@ sub edit_item {
 		my @topics = map +{ 
 			"cfg_topic", $_->name, 
 			"cfg_topic_id", $_->id, 
-			"selected", $_->id eq $cur_topic ? 1 : 0 
+			"selected", $cur_topics{$_->id} ? 1 : 0 
 		}, $self->cfg->topics->topic;
 		$item->{topics}   = \@topics;
 	}
@@ -334,10 +331,13 @@ sub update_item {
 		'status'    => $self->query->param('status'),
 		'text'      => $self->query->param('text'),
 		'title'     => $self->query->param('title'),
-		'topic'     => $self->query->param('topic') ? $self->query->param('topic') : undef,
 		'type'      => $self->query->param('type'),
 		'o_id'      => $self->query->param('o_id'),
 	};
+
+	if ( $self->query->param('topic') ) {
+		$item->{topics}{topic} = [$self->query->param('topic')];
+	}
 
 	$self->model->save($item);
 
@@ -527,17 +527,21 @@ sub publish {
 			$item->{teaser} = $self->filter->to_xhtml($item->{teaser});
 
 			my $type = first {$_->id eq $item->{type}} $self->cfg->types->type;
+			warn $type->template;
 			
-			my $tmpl = $self->load_user_tmpl($type->template);
-			$tmpl->param('item', $item);
-			$tmpl->param('cfg', $self->cfg);
+			my $output = $self->view->load(
+				name => $type->template, 
+				params => {
+					item => $item,
+					cfg => $self->cfg,
+			});
 
 			my $new_filename = $self->get_target_filename($item->{id}, $item->{type});
 
 			my $fh = IO::File->new($new_filename, "w") 
 				or miril_warn("Cannot open file $new_filename for writing", $!);
 			if ($fh) {
-				$fh->print( $tmpl->output )
+				$fh->print( $output )
 					or miril_warn("Cannot print to file $new_filename", $!);
 				$fh->close;
 			}
@@ -573,16 +577,19 @@ sub publish {
 
 				my @items = $self->model->get_items( %params );
 
-				my $tmpl = $self->load_user_tmpl($list->template);
-				$tmpl->param('items', \@items);
-				$tmpl->param('cfg', $self->cfg);
+				my $output = $self->view->load(
+					name => $list->template,
+					params => {
+						items => \@items,
+						cfg => $self->cfg,
+				});
 
 				my $new_filename = catfile($self->cfg->output_path, $list->location);
 
 				my $fh = IO::File->new($new_filename, "w") 
 					or miril_warn("Cannot open file $new_filename for writing", $!);
 				if ($fh) {
-					$fh->print( $tmpl->output )
+					$fh->print( $output )
 						or miril_warn("Cannot print to file $new_filename", $!);
 					$fh->close;
 				}
@@ -612,6 +619,7 @@ sub errors       { shift->{errors};       }
 sub user_manager { shift->{user_manager}; }
 sub msg_cookie   { shift->{msg_cookie};   }
 sub pager        { shift->{pager};        }
+sub view         { shift->{view};         }
 
 ### AUXILLIARY FUNCTIONS ###
 
