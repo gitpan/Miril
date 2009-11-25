@@ -22,13 +22,20 @@ sub new {
 	$cfg->{filter}         = 'Markdown'       unless defined $cfg->{filter};
 	$cfg->{view}           = 'HTML::Template' unless defined $cfg->{view};
 
-	$cfg->{items_per_page} = 10             unless defined $cfg->{items_per_page};
+	$cfg->{items_per_page} = 10               unless defined $cfg->{items_per_page};
 
 	$cfg->{xml_data}       = catfile($cfg->{cache_path}, 'data.xml');
 	$cfg->{latest_data}    = catfile($cfg->{cache_path}, 'latest.xml');
 	$cfg->{users_data}     = catfile($cfg->{cfg_path}, 'users.xml');
 
 	$cfg->{workflow}{status} = [qw(draft published)];
+	$cfg->{statuses} = [qw(draft published)];
+
+	### SIMPLIFY THE HASHREF ###
+	
+	$cfg->{authors} = $cfg->{authors}{author};
+	$cfg->{topics}  = $cfg->{topics}{topic};
+	$cfg->{types}   = $cfg->{types}{type};
 
 	return dao $cfg;
 }

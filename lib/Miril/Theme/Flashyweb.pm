@@ -3,38 +3,39 @@ package Miril::Theme::Flashyweb;
 use strict;
 use warnings;
 
+use Miril::Theme::Flashyweb::Stylesheet;
+
 ### TEMPLATES ###
 
 my $account = <<EndOfHTML;
 
 <TMPL_VAR NAME="header">
 
-	<TMPL_LOOP NAME="user">
 	<!-- start content -->
 	<div id="content">
 		<div class="post">
-			<h2 class="title"><span class="dingbat">&#x273b;</span> <TMPL_VAR NAME="username"></h2>
+			<h2 class="title"><span class="dingbat">&#x273b;</span> <TMPL_VAR NAME="user.username"></h2>
 			<div class="edit">
 				<form method="POST">
 					<p class="edit">Name <span class="required">*</span>:<br>
-					<input type="text" name="name" class="textbox" value='<TMPL_VAR NAME="name">' /></p>
+					<input type="text" name="name" class="textbox" value='<TMPL_VAR NAME="user.name">' /></p>
 
 					<p class="edit">Email: <span class="required">*</span><br>
-					<input type="text" name="email" class="textbox" value='<TMPL_VAR NAME="email">' /></p>
+					<input type="text" name="email" class="textbox" value='<TMPL_VAR NAME="user.email">' /></p>
 
 					<p class="edit">New password:<br>
 					<input type="password" name="new_password" class="textbox" />
 					</p>
 
 					<p class="edit">Retype new password:<br>
-					<input type="password" name="new_password_2" class="textbox" />
+					<input type="password" name="retype_password" class="textbox" />
 					</p>
 
 					<p class="edit">Existing password: <span class="required">*</span><br>
 					<input type="password" name="password" class="textbox" />
 					</p>
 
-					<input type="hidden" name="username" value='<TMPL_VAR NAME="username">' />
+					<input type="hidden" name="username" value='<TMPL_VAR NAME="user.username">' />
 
 					<button type="submit" id="x" name="action" value="update_user">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;
 					<button type="submit" id="x" name="action" value="list">Cancel</button>
@@ -45,8 +46,6 @@ my $account = <<EndOfHTML;
 		</div>
 	</div>
 	<!-- end content -->
-	</TMPL_LOOP>
-
 
 <TMPL_VAR NAME="footer">
 
@@ -56,32 +55,31 @@ my $edit = <<EndOfHTML;
 
 <TMPL_VAR NAME="header">
 
-	<TMPL_LOOP NAME="item">
 	<!-- start content -->
 	<div id="content">
 		<div class="post">
-			<h2 class="title"><TMPL_IF NAME="selected"><TMPL_VAR NAME="title"><TMPL_ELSE>New Article</TMPL_IF></h2>
+			<h2 class="title"><TMPL_IF NAME="item.title"><TMPL_VAR NAME="item.title"><TMPL_ELSE>New Article</TMPL_IF></h2>
 			<div class="edit">
 				<form method="POST">
 					<p class="edit">Title:<br>
-					<input type="text" name="title" class="textbox" value='<TMPL_VAR NAME="title">' /></p>
+					<input type="text" name="title" class="textbox" value='<TMPL_VAR NAME="item.title">' /></p>
 
 					<p class="edit">ID:<br>
-					<input type="text" name="id" class="textbox" value='<TMPL_VAR NAME="id">' /></p>
+					<input type="text" name="id" class="textbox" value='<TMPL_VAR NAME="item.id">' /></p>
 					
 					<p class="edit">Type:<br>
 					<select name="type">
-					<TMPL_LOOP NAME="types">
-						<option value='<TMPL_VAR NAME="cfg_m_type">'<TMPL_IF NAME="selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="cfg_type"></option>
+					<TMPL_LOOP NAME="item.types">
+						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 
-					<TMPL_IF NAME="has_authors">
+					<TMPL_IF NAME="item.authors">
 					<p class="edit">Author:<br>
 					<select name="author">
-					<TMPL_LOOP NAME="authors">
-						<option value='<TMPL_VAR NAME="cfg_author">'><TMPL_VAR NAME="cfg_author"></option>
+					<TMPL_LOOP NAME="item.authors">
+						<option value='<TMPL_VAR NAME="this.id">'><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
@@ -89,26 +87,26 @@ my $edit = <<EndOfHTML;
 
 					<p class="edit">Status:<br>
 					<select name="status">
-					<TMPL_LOOP NAME="statuses">
-						<option value='<TMPL_VAR NAME="cfg_status">'<TMPL_IF NAME="selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="cfg_status"></option>
+					<TMPL_LOOP NAME="item.statuses">
+						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 
-					<TMPL_IF NAME="has_topics">
+					<TMPL_IF NAME="item.topics">
 					<p class="edit">Topic:<br>
 					<select name="topic" size=3 multiple="multiple">
-					<TMPL_LOOP NAME="topics">
-						<option value='<TMPL_VAR NAME="cfg_topic_id">'<TMPL_IF NAME="selected"> selected</TMPL_IF>><TMPL_VAR NAME="cfg_topic"></option>
+					<TMPL_LOOP NAME="item.topics">
+						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 					</TMPL_IF>
 
 					<p class="edit" name="text">Text:<br>
-					<textarea name="text"><TMPL_VAR NAME="text"></textarea></p>
+					<textarea name="text"><TMPL_VAR NAME="item.text"></textarea></p>
 
-					<input type="hidden" name="o_id" value='<TMPL_VAR NAME="id">' />
+					<input type="hidden" name="old_id" value='<TMPL_VAR NAME="item.id">' />
 
 					<button type="submit" id="x" name="action" value="update">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;
 					<button type="submit" id="x" name="action" value="delete">Delete</button>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -118,7 +116,6 @@ my $edit = <<EndOfHTML;
 		</div>
 	</div>
 	<!-- end content -->
-	</TMPL_LOOP>
 
 
 <TMPL_VAR NAME="footer">
@@ -321,17 +318,17 @@ my $search = <<EndOfHTML;
 				<select name="type">
 					<option value=''>--Any--</option>
 				<TMPL_LOOP NAME="types">
-					<option value='<TMPL_VAR NAME="cfg_m_type">'><TMPL_VAR NAME="cfg_type"></option>
+					<option value='<TMPL_VAR NAME="id">'><TMPL_VAR NAME="name"></option>
 				</TMPL_LOOP>
 				</select>
 				</p>
 
-				<TMPL_IF NAME="has_authors">
+				<TMPL_IF NAME="authors">
 				<p class="edit">Author:<br>
 				<select name="author">
 					<option value=''>--Any--</option>
 				<TMPL_LOOP NAME="authors">
-					<option value='<TMPL_VAR NAME="cfg_author">'><TMPL_VAR NAME="cfg_author"></option>
+					<option value='<TMPL_VAR NAME="id">'><TMPL_VAR NAME="name"></option>
 				</TMPL_LOOP>
 				</select>
 				</p>
@@ -341,17 +338,17 @@ my $search = <<EndOfHTML;
 				<select name="status">
 					<option value=''>--Any--</option>
 				<TMPL_LOOP NAME="statuses">
-					<option value='<TMPL_VAR NAME="cfg_status">'><TMPL_VAR NAME="cfg_status"></option>
+					<option value='<TMPL_VAR NAME="id">'><TMPL_VAR NAME="name"></option>
 				</TMPL_LOOP>
 				</select>
 				</p>
 
-				<TMPL_IF NAME="has_topics">
+				<TMPL_IF NAME="topics">
 				<p class="edit">Topic:<br>
 				<select name="topic">
 					<option value=''>--Any--</option>
 				<TMPL_LOOP NAME="topics">
-					<option value='<TMPL_VAR NAME="cfg_topic_id">'><TMPL_VAR NAME="cfg_topic"></option>
+					<option value='<TMPL_VAR NAME="id">'><TMPL_VAR NAME="name"></option>
 				</TMPL_LOOP>
 				</select>
 				</p>
@@ -458,522 +455,6 @@ my $sidebar = <<EndOfHTML;
 
 EndOfHTML
 
-my $css = <<EndOfHTML;
-
-/*
-Design by Free CSS Templates
-http://www.freecsstemplates.org
-Released for free under a Creative Commons Attribution 2.5 License
-*/
-
-body {
-	margin-top: 20px;
-	padding: 0;
-	background: #FDF9EE;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	color: #6D6D6D;
-}
-
-h1, h2, h3 {
-	margin: 0;
-	font-family: Georgia, "Times New Roman", Times, serif;
-	font-weight: normal;
-	color: #006EA6;
-}
-
-h1, h2 {
-	text-transform: lowercase;
-}
-
-h1 {
-	letter-spacing: -1px;
-	font-size: 35px;
-}
-
-h2 {
-	font-size: 26px;
-}
-
-p, ul, ol {
-	margin: 0 0 1.5em 0;
-	text-align: justify;
-	line-height: 26px;
-}
-
-a:link {
-	color: #0094E0;
-}
-
-a:hover, a:active {
-	text-decoration: none;
-	color: #0094E0;
-}
-
-a:visited {
-	color: #0094E0;
-}
-
-img {
-	border: none;
-}
-
-img.left {
-	float: left;
-	margin: 7px 15px 0 0;
-}
-
-img.right {
-	float: right;
-	margin: 7px 0 0 15px;
-}
-
-/* Form */
-
-form {
-	margin: 0;
-	padding: 0;
-}
-
-fieldset {
-	margin: 0;
-	padding: 0;
-	border: none;
-}
-
-legend {
-	display: none;
-}
-
-input, textarea, select, button {
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-	font-size: 13px;
-	color: #333333;
-}
-
-#wrapper {
-}
-
-/* Header */
-
-#header {
-	width: 900px;
-	min-height: 40px;
-	margin: 0 auto 20px auto;
-	padding-top: 10px;
-}
-
-#logo {
-	float: left;
-	height: 40px;
-	margin-left: 10px;
-}
-
-#logo h1 {
-	float: left;
-	margin: 0;
-	font-size: 38px;
-	color: #0099E8;
-}
-
-#logo h1 sup {
-	vertical-align: text-top;
-	font-size: 24px;
-}
-
-#logo h1 a {
-	color: #0099E8;
-}
-
-#logo h2 {
-	float: left;
-	margin: 0;
-	padding: 20px 0 0 10px;
-	text-transform: uppercase;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10px;
-	color: #6D6D6D;
-}
-
-#logo a {
-	text-decoration: none;
-	color: #FFFFFF;
-}
-
-/* Menu */
-
-#menu {
-	float: right;
-}
-
-#menu ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-#menu li {
-	display: inline;
-}
-
-#menu a {
-	display: block;
-	float: left;
-	margin-left: 5px;
-	background: #0094E0;
-	border: 1px dashed #FFFFFF;
-	padding: 1px 10px;
-	text-decoration: none;
-	font-size: 12px;
-	color: #FFFFFF;
-}
-
-#menu a:hover {
-	text-decoration: underline;
-}
-
-#menu .active a {
-}
-
-/* Page */
-
-#page {
-	width: 900px;
-	margin: 0 auto;
-	background: #FFFFFF;
-	border: 1px #F0E9D6 solid;
-	padding: 20px 20px;
-}
-
-/* Content */
-
-#content {
-	float: left;
-	width: 600px;
-	padding-left: 10px;
-}
-
-/* Post */
-
-.post {
-}
-
-.post .title {
-	margin-bottom: 20px;
-	padding-bottom: 5px;
-	/* padding-left: 40px; */
-	border-bottom: 1px dashed #D1D1D1;
-	color: #8BCB2F;
-}
-
-.post .title b {
-	font-weight: normal;
-	color: #0094E0;
-}
-
-.post .entry {
-}
-
-.post .meta {
-	margin: 0;
-	padding: 15px 0 60px 0;
-}
-
-.post .meta p {
-	margin: 0;
-	line-height: normal;
-}
-
-.post .meta .byline {
-	float: left;
-	color: #0000FF;
-}
-
-.post .meta .links {
-	float: left;
-}
-
-.post .meta .more {
-	width: 185px;
-	height: 35px;
-	padding: 5px 10px;
-	background: #8BCB2F;
-	border: 1px dashed #FFFFFF;
-	text-transform: uppercase;
-	text-decoration: none;
-	font-size: 9px;
-}
-
-.post .meta .comments {
-	padding: 5px 10px;
-	text-transform: uppercase;
-	text-decoration: none;
-	background: #0094E0;
-	border: 1px dashed #FFFFFF;
-	font-size: 9px;
-}
-
-.post .meta b {
-	display: none;
-}
-
-.post .meta a {
-	color: #FFFFFF;
-}
-/* Sidebar */
-
-#sidebar {
-	float: right;
-	width: 230px;
-	padding-right: 10px;
-}
-
-#sidebar ul {
-	margin: 0;
-	padding: 10px 0 0 0;
-	list-style: none;
-}
-
-#sidebar li {
-	margin-bottom: 40px;
-}
-
-#sidebar li ul {
-}
-
-#sidebar li li {
-	margin: 0;
-	padding: 6px 0;
-	border-bottom: 1px dashed #D1D1D1;
-	display: block;
-}
-
-#sidebar li li a {
-	margin: 0;
-	padding-left: 1.5em;
-	display: block;
-	line-height: 20px;
-}
-
-#sidebar h2 {
-	padding-bottom: 5px;
-	font-size: 18px;
-	font-weight: normal;
-	color: #0094E0;
-}
-
-#sidebar strong, #sidebar b {
-	color: #8BCB2F;
-}
-
-#sidebar a {
-	text-decoration: none;
-	color: #6D6D6D;
-}
-
-/* Search */
-
-#search {
-}
-
-#search h2 {
-}
-
-#s {
-	width: 80%;
-	margin-right: 5px;
-	padding: 3px;
-	border: 1px solid #F0F0F0;
-}
-
-#x {
-	padding: 3px;
-	background: #ECECEC repeat-x left bottom;
-	border: none;
-	text-transform: lowercase;
-	font-size: 11px;
-	color: #4F4F4F;
-}
-
-/* Boxes */
-
-.box1 {
-	padding: 20px;
-}
-
-.box2 {
-	color: #BABABA;
-}
-
-.box2 h2 {
-	margin-bottom: 15px;
-	font-size: 16px;
-	color: #FFFFFF;
-}
-
-.box2 ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.box2 a:link, .box2 a:hover, .box2 a:active, .box2 a:visited  {
-	color: #EDEDED;
-}
-
-/* Footer */
-
-#footer {
-	width: 880px;
-	margin: 0 auto;
-	padding: 10px 0 0 0;
-	color: #353535;
-}
-
-html>body #footer {
-	height: auto;
-}
-
-#footer-menu {
-}
-
-#legal {
-	clear: both;
-	font-size: 11px;
-	color: #6D6D6D;
-}
-
-#legal a {
-	color: #0094E0;
-}
-
-#footer-menu {
-	float: left;
-	color: #353535;
-	text-transform: capitalize;
-}
-
-#footer-menu ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-#footer-menu li {
-	display: inline;
-}
-
-#footer-menu a {
-	display: block;
-	float: left;
-	padding: 1px 15px 1px 15px;
-	text-decoration: none;
-	font-size: 11px;
-	color: #6D6D6D;
-}
-
-#footer-menu a:hover {
-	text-decoration: underline;
-}
-
-#footer-menu .active a {
-	padding-left: 0;
-}
-
-/* Petar's additions! */
-
-.edit input.textbox {
-	width: 50%;
-}
-
-.edit textarea {
-	width: 100%;
-	height: 250px;
-}
-
-.edit p.edit {
-	margin-top: 5px;
-	margin-bottom: 5px;
-}
-
-.post h2 {
-	text-transform: none;
-}
-
-.dingbat {
-	color: #006EA6;
-}
-
-#sidebar h2.bold {
-	font-weight: bold;
-}
-
-div.entry * {
-	color: #6D6D6D;
-}
-
-span.required {
-	color: red;
-}
-
-p.item-desc {
-	font-family: Georgia,"Times New Roman",Times,serif;
-}
-
-h3 .dingbat {
-	margin-right: 10px;
-}
-
-div#error {
-	border: 1px solid #F0E9D6;
-	margin-bottom: 10px;
-}
-
-#error ul {
-	margin: 1em 0 1em;
-}
-
-#error h2 {
-	margin-top: 0.5em;
-	margin-left: 1em;
-	color: red;
-	font-size: 18px;
-	font-weight: bold;
-}
-
-.more {
-	margin-right: 5px;
-}
-
-div.entry p {
-	line-height: 1.8em;
-	font-family: Georgia,"Times New Roman",Times,serif;
-	text-align: left;
-}
-
-div.entry li {
-	line-height: 1.8em;
-	font-family: Georgia,"Times New Roman",Times,serif;
-	text-align: left;
-}
-
-div.entry h1, h2, h3 {
-	margin-top: 0.7em;
-	margin-bottom: 0.3em;
-}
-
-div.pager {
-	text-align: center;
-}
-
-div.dingbat {
-	float: left;
-	width: 1.5em;
-}
-
-
-EndOfHTML
-
 my $view = <<EndOfHTML;
 
 <TMPL_VAR NAME="header">
@@ -1025,8 +506,9 @@ sub get {
 	my $self = shift;
 	my $name = shift;
 
+	$name eq "css"      && return Miril::Theme::Flashyweb::Stylesheet::get();
+
 	$name eq "account"  && return $account;
-	$name eq "css"      && return $css;
 	$name eq "edit"     && return $edit;
 	$name eq "files"    && return $files;
 	$name eq "footer"   && return $footer;

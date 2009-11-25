@@ -1,12 +1,14 @@
 ---
 name: Miril
-version: 0.004
+version: 0.005
 author:
   - 'Peter Shangov <pshangov@yahoo.com>'
 abstract: A Static Content Management System
 license: perl
 resources:
-  license: ~
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test::More: 0
 requires:
   CGI: 0
   CGI::Application: 0
@@ -31,12 +33,12 @@ requires:
   Time::Format: 0
   Try::Tiny: 0
   XML::TreePP: 0
-build_requires:
-  Test::More: 0
+configure_requires:
+  Module::Build: 0.340201
 provides:
   Miril:
     file: lib/Miril.pm
-    version: 0.004
+    version: 0.005
   Miril::Config:
     file: lib/Miril/Config.pm
   Miril::Error:
@@ -55,7 +57,7 @@ provides:
     file: lib/Miril/View/HTML/Template.pm
   Miril::View::Text::Template:
     file: lib/Miril/View/Text/Template.pm
-generated_by: Module::Build version 0.32
+generated_by: Module::Build version 0.340201
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
