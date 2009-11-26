@@ -1,5 +1,8 @@
 Revision history for Miril
 
+0.006   26/11/2009
+        * Added files missing from MANIFEST
+
 0.005   25/11/2009
         * A lot of refactoring
 		* Added Miril::Hacking for developers

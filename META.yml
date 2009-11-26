@@ -1,6 +1,6 @@
 ---
 name: Miril
-version: 0.005
+version: 0.006
 author:
   - 'Peter Shangov <pshangov@yahoo.com>'
 abstract: A Static Content Management System
@@ -38,7 +38,7 @@ configure_requires:
 provides:
   Miril:
     file: lib/Miril.pm
-    version: 0.005
+    version: 0.006
   Miril::Config:
     file: lib/Miril/Config.pm
   Miril::Error:
@@ -49,8 +49,12 @@ provides:
     file: lib/Miril/Model/File/XMLTPP.pm
   Miril::Theme::Flashyweb:
     file: lib/Miril/Theme/Flashyweb.pm
+  Miril::Theme::Flashyweb::Stylesheet:
+    file: lib/Miril/Theme/Flashyweb/Stylesheet.pm
   Miril::UserManager::XMLTPP:
     file: lib/Miril/UserManager/XMLTPP.pm
+  Miril::Util:
+    file: lib/Miril/Util.pm
   Miril::View::Abstract:
     file: lib/Miril/View/Abstract.pm
   Miril::View::HTML::Template:
