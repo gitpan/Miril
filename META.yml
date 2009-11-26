@@ -1,6 +1,6 @@
 ---
 name: Miril
-version: 0.006
+version: 0.007
 author:
   - 'Peter Shangov <pshangov@yahoo.com>'
 abstract: A Static Content Management System
@@ -38,7 +38,7 @@ configure_requires:
 provides:
   Miril:
     file: lib/Miril.pm
-    version: 0.006
+    version: 0.007
   Miril::Config:
     file: lib/Miril/Config.pm
   Miril::Error:
