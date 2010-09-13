@@ -2,6 +2,7 @@ package Miril::Theme::Flashyweb;
 
 use strict;
 use warnings;
+use autodie;
 
 use Miril::Theme::Flashyweb::Stylesheet;
 
@@ -17,11 +18,9 @@ my $account = <<EndOfHTML;
 			<h2 class="title"><span class="dingbat">&#x273b;</span> <TMPL_VAR NAME="user.username"></h2>
 			<div class="edit">
 				<form method="POST">
-					<p class="edit">Name <span class="required">*</span>:<br>
-					<input type="text" name="name" class="textbox" value='<TMPL_VAR NAME="user.name">' /></p>
 
-					<p class="edit">Email: <span class="required">*</span><br>
-					<input type="text" name="email" class="textbox" value='<TMPL_VAR NAME="user.email">' /></p>
+					<p class="edit">Name:<br>
+					<input type="text" name="name" class="textbox" value='<TMPL_VAR NAME="user.name">' /></p>
 
 					<p class="edit">New password:<br>
 					<input type="password" name="new_password" class="textbox" />
@@ -31,16 +30,15 @@ my $account = <<EndOfHTML;
 					<input type="password" name="retype_password" class="textbox" />
 					</p>
 
-					<p class="edit">Existing password: <span class="required">*</span><br>
+					<p class="edit">Existing password: <span class="required">(Required)</span><br>
 					<input type="password" name="password" class="textbox" />
 					</p>
 
 					<input type="hidden" name="username" value='<TMPL_VAR NAME="user.username">' />
 
-					<button type="submit" id="x" name="action" value="update_user">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;
+					<button type="submit" id="x" name="action" value="account">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;
 					<button type="submit" id="x" name="action" value="list">Cancel</button>
 
-					<p class="edit"><span class="required">* - Required fields</span></p>
 				</form>
 			</div>
 		</div>
@@ -58,55 +56,55 @@ my $edit = <<EndOfHTML;
 	<!-- start content -->
 	<div id="content">
 		<div class="post">
-			<h2 class="title"><TMPL_IF NAME="item.title"><TMPL_VAR NAME="item.title"><TMPL_ELSE>New Article</TMPL_IF></h2>
+			<h2 class="title"><TMPL_IF NAME="post.title"><TMPL_VAR NAME="post.title"><TMPL_ELSE>New Article</TMPL_IF></h2>
 			<div class="edit">
 				<form method="POST">
 					<p class="edit">Title:<br>
-					<input type="text" name="title" class="textbox" value='<TMPL_VAR NAME="item.title">' /></p>
+					<input type="text" name="title" class="textbox <TMPL_IF NAME="invalid.title"> invalid</TMPL_IF>" value='<TMPL_VAR NAME="post.title">' /></p>
 
 					<p class="edit">ID:<br>
-					<input type="text" name="id" class="textbox" value='<TMPL_VAR NAME="item.id">' /></p>
+					<input type="text" name="id" class="textbox<TMPL_IF NAME="invalid.id"> invalid</TMPL_IF>" value='<TMPL_VAR NAME="post.id">' /></p>
 					
 					<p class="edit">Type:<br>
-					<select name="type">
-					<TMPL_LOOP NAME="item.types">
+					<select name="type"<TMPL_IF NAME="invalid.type"> class="invalid"</TMPL_IF>>
+					<TMPL_LOOP NAME="post.types">
 						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 
-					<TMPL_IF NAME="item.authors">
+					<TMPL_IF NAME="post.authors">
 					<p class="edit">Author:<br>
-					<select name="author">
-					<TMPL_LOOP NAME="item.authors">
-						<option value='<TMPL_VAR NAME="this.id">'><TMPL_VAR NAME="this.name"></option>
+					<select name="author"<TMPL_IF NAME="invalid.author"> class="invalid"</TMPL_IF>>
+					<TMPL_LOOP NAME="post.authors">
+						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 					</TMPL_IF>
 
 					<p class="edit">Status:<br>
-					<select name="status">
-					<TMPL_LOOP NAME="item.statuses">
+					<select name="status" <TMPL_IF NAME="invalid.status"> class="invalid"</TMPL_IF>>
+					<TMPL_LOOP NAME="post.statuses">
 						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected="selected"</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 
-					<TMPL_IF NAME="item.topics">
+					<TMPL_IF NAME="post.topics">
 					<p class="edit">Topic:<br>
-					<select name="topic" size=3 multiple="multiple">
-					<TMPL_LOOP NAME="item.topics">
+					<select name="topic" size=3 multiple="multiple"<TMPL_IF NAME="invalid.topic"> class="invalid"</TMPL_IF>>
+					<TMPL_LOOP NAME="post.topics">
 						<option value='<TMPL_VAR NAME="this.id">'<TMPL_IF NAME="this.selected"> selected</TMPL_IF>><TMPL_VAR NAME="this.name"></option>
 					</TMPL_LOOP>
 					</select>
 					</p>
 					</TMPL_IF>
 
-					<p class="edit" name="text">Text:<br>
-					<textarea name="text"><TMPL_VAR NAME="item.text"></textarea></p>
+					<p class="edit" name="source">Body:<br>
+					<textarea name="source"<TMPL_IF NAME="invalid.source"> class="invalid"</TMPL_IF>><TMPL_VAR NAME="post.source"></textarea></p>
 
-					<input type="hidden" name="old_id" value='<TMPL_VAR NAME="item.id">' />
+					<input type="hidden" name="old_id" value='<TMPL_VAR NAME="post.id">' />
 
 					<button type="submit" id="x" name="action" value="update">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;
 					<button type="submit" id="x" name="action" value="delete">Delete</button>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -145,7 +143,7 @@ my $files = <<EndOfHTML;
 		<div class="pager">
 			<TMPL_VAR NAME="pager">
 		</div>
-		<button type="submit" id="x" name="action" value="delete_files">Delete selected</button>
+		<button type="submit" id="x" name="action" value="unlink">Delete selected</button>
 		</form>
 	
 		</div>
@@ -172,7 +170,7 @@ my $upload = <<EndOfHTML;
 				<p class="edit"><input type="file" name="file" />
 				<p class="edit"><input type="file" name="file" />
 			</div>
-			<button type="submit" id="x" name="action" value="upload_files">Upload files</button>
+			<button type="submit" id="x" name="action" value="upload">Upload files</button>
 			<button name="action" value="files" id="x">Cancel</button>
 			</p>
 		</form>
@@ -261,7 +259,8 @@ Description: A two-column, fixed-width and lightweight template ideal for 1024x7
 	<div id="error">
 	<h2>miril encountered problems:</h2>
 		<ul>
-			<TMPL_LOOP NAME="error"><li><TMPL_VAR NAME="miril_msg">: <TMPL_VAR NAME="perl_msg"></li></TMPL_LOOP>
+			<TMPL_LOOP NAME="warnings"><li class="warning"><TMPL_VAR NAME="message"><pre><TMPL_VAR NAME="errorvar"></pre></li></TMPL_LOOP>
+			<TMPL_LOOP NAME="fatals"><li class="fatal"><TMPL_VAR NAME="message"><pre><TMPL_VAR NAME="errorvar"></pre></li></TMPL_LOOP>
 		</ul>
 	</div>
 </TMPL_IF>
@@ -281,11 +280,11 @@ my $list = <<EndOfHTML;
 		</div>
 		<div class="entry">
 				
-		<TMPL_LOOP NAME="items">
-			<h3><span class="dingbat">&#8226;</span><a href='?action=view&id=<TMPL_VAR NAME="id">'><TMPL_VAR NAME="title"></a></h3>
+		<TMPL_LOOP NAME="posts.list">
+			<h3><span class="dingbat">&#8226;</span><a href='?action=view&id=<TMPL_VAR NAME="this.id">'><TMPL_VAR NAME="this.title"></a></h3>
 			<p class="item-desc">
-				<b>Status:</b> <TMPL_VAR NAME="status">,&nbsp; 
-				<b>Modified:</b> <TMPL_VAR NAME="modified.slash">
+				<b>Status:</b> <TMPL_VAR NAME="this.status">,&nbsp; 
+				<b>Modified:</b> <TMPL_VAR NAME="this.modified.strftime('%d/%m/%Y %H:%M')">
 			</p>
 		</TMPL_LOOP>
 
@@ -462,12 +461,12 @@ my $view = <<EndOfHTML;
 	<!-- start content -->
 	<div id="content">
 		<div class="post">
-			<h2 class="title"><span class="dingbat">&#x273b;</span> <TMPL_VAR NAME="item.title"></h2>
+			<h2 class="title"><span class="dingbat">&#x273b;</span> <TMPL_VAR NAME="post.title"></h2>
 			<div class="entry">
-				<TMPL_VAR NAME="item.text">
+				<TMPL_VAR NAME="post.body">
 			</div>
 			<form method="get">
-			<input type="hidden" name="id" value='<TMPL_VAR NAME="item.id">' />
+			<input type="hidden" name="id" value='<TMPL_VAR NAME="post.id">' />
 			<button name="action" value="edit" id="x">Edit</button>&nbsp;&nbsp;&nbsp;&nbsp;
 			<button name="action" value="list" id="x">Cancel</button>
 			</form>

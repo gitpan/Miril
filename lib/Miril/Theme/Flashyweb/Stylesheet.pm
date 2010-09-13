@@ -2,6 +2,7 @@ package Miril::Theme::Flashyweb::Stylesheet;
 
 use strict;
 use warnings;
+use autodie;
 
 sub get {
 
@@ -480,6 +481,11 @@ div#error {
 	margin: 1em 0 1em;
 }
 
+#error ul li pre {
+	margin: 0;
+	color: #6D6D6D;
+}
+
 #error h2 {
 	margin-top: 0.5em;
 	margin-left: 1em;
@@ -516,6 +522,18 @@ div.pager {
 div.dingbat {
 	float: left;
 	width: 1.5em;
+}
+
+.invalid {
+	outline: red solid medium;
+}
+
+li.warning {
+	color: #8BCB2F;
+}
+
+li.fatal {
+	color: #FF0000;
 }
 
 
